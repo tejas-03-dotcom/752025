@@ -1,307 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR Spell Check App</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .btn-group {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 0 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        .btn-process {
-            background-color: #2ecc71;
-        }
-        .btn-process:hover {
-            background-color: #27ae60;
-        }
-        .btn-save {
-            background-color: #e74c3c;
-        }
-        .btn-save:hover {
-            background-color: #c0392b;
-        }
-        .btn:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        .image-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-        #imagePreview {
-            max-width: 100%;
-            max-height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: none;
-        }
-        .text-results {
-            margin-top: 20px;
-        }
-        #extractedText {
-            width: 100%;
-            min-height: 200px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            background-color: #fafafa;
-        }
-        .misspelled {
-            color: red;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        .status {
-            text-align: center;
-            margin: 10px 0;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .instructions {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border-left: 4px solid #3498db;
-        }
-        .github-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #fileInput {
-            display: none;
-        }
-        .drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 5px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-        .drop-area.highlight {
-            border-color: #3498db;
-            background-color: #f0f8ff;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OCR Spell Check App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    h1 {
+      color: #007acc;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #444;
+    }
+    a {
+      color: #007acc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .badges img {
+      margin-right: 10px;
+    }
+    code {
+      background: #eee;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+    img.screenshot {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      color: #777;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Image OCR with Spell Check</h1>
+  <div class="container">
+    <h1>🖼️ OCR Spell Check App</h1>
+    <p>This desktop app uses OCR to extract text from images and highlights any spelling errors. Built with <strong>Python</strong>, <strong>Tkinter</strong>, <strong>Pillow</strong>, <strong>TextBlob</strong>, and <strong>Tesseract OCR</strong>.</p>
 
-        <div class="instructions">
-            <p>Upload an image to extract text and check for spelling errors:</p>
-            <ol>
-                <li>Click "Load Image" or drag & drop an image file</li>
-                <li>Click "Process Image" to analyze the text</li>
-                <li>Misspelled words will be highlighted in red</li>
-                <li>Click "Save Result" to download the processed image</li>
-            </ol>
-        </div>
-
-        <input type="file" id="fileInput" accept="image/*">
-        <div class="drop-area" id="dropArea">
-            <p>Drag & drop your image here or click to select</p>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn" id="loadBtn">Load Image</button>
-            <button class="btn btn-process" id="processBtn" disabled>Process Image</button>
-            <button class="btn btn-save" id="saveBtn" disabled>Save Result</button>
-        </div>
-
-        <div class="status" id="status">Please load an image to begin</div>
-
-        <div class="image-container">
-            <img id="imagePreview">
-        </div>
-
-        <div class="text-results">
-            <h3>Extracted Text:</h3>
-            <div id="extractedText"></div>
-        </div>
-
-        <div class="github-link">
-            <a href="https://github.com/tejas-03-dotcom/752025" target="_blank">View on GitHub</a>
-        </div>
+    <div class="badges">
+      <a href="https://github.com/tejas-03-dotcom/752025/stargazers" target="_blank">
+        <img src="https://img.shields.io/github/stars/tejas-03-dotcom/752025?style=social" alt="GitHub stars">
+      </a>
+      <a href="https://github.com/tejas-03-dotcom/752025/network/members" target="_blank">
+        <img src="https://img.shields.io/github/forks/tejas-03-dotcom/752025?style=social" alt="GitHub forks">
+      </a>
     </div>
 
-    <script>
-        // DOM elements
-        const fileInput = document.getElementById('fileInput');
-        const dropArea = document.getElementById('dropArea');
-        const loadBtn = document.getElementById('loadBtn');
-        const processBtn = document.getElementById('processBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const imagePreview = document.getElementById('imagePreview');
-        const extractedText = document.getElementById('extractedText');
-        const status = document.getElementById('status');
+    <h2>📷 Screenshot</h2>
+    <img src="screenshot.png" alt="App Screenshot" class="screenshot">
+    <p><em>Add a file named <code>screenshot.png</code> to your repository to display it here.</em></p>
 
-        // Variables
-        let originalImage = null;
-        let processedImage = null;
-        let misspelledWords = [];
+    <h2>🚀 How to Run</h2>
+    <ol>
+      <li>Clone this repo: <code>git clone https://github.com/tejas-03-dotcom/752025</code></li>
+      <li>Install dependencies: <code>pip install pillow pytesseract textblob</code></li>
+      <li>Install Tesseract OCR and set the correct path inside the Python file</li>
+      <li>Run the app: <code>python app.py</code></li>
+    </ol>
 
-        // Event listeners
-        loadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelect);
-        dropArea.addEventListener('click', () => fileInput.click());
-        processBtn.addEventListener('click', processImage);
-        saveBtn.addEventListener('click', saveResult);
+    <h2>📂 Project Files</h2>
+    <ul>
+      <li><code>app.py</code> – Main application code</li>
+      <li><code>requirements.txt</code> – Dependencies (you can create this)</li>
+      <li><code>index.html</code> – This landing page</li>
+    </ul>
 
-        // Drag and drop events
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
+    <h2>🔗 GitHub Repo</h2>
+    <p>
+      View the source code on GitHub:<br/>
+      <a href="https://github.com/tejas-03-dotcom/752025" target="_blank">https://github.com/tejas-03-dotcom/752025</a>
+    </p>
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            dropArea.classList.add('highlight');
-        }
-
-        function unhighlight() {
-            dropArea.classList.remove('highlight');
-        }
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length) {
-                handleFiles(files);
-            }
-        }
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length) {
-                handleFiles(files);
-            }
-        }
-
-        function handleFiles(files) {
-            const file = files[0];
-            if (file.type.match('image.*')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    originalImage = e.target.result;
-                    imagePreview.src = originalImage;
-                    imagePreview.style.display = 'block';
-                    processBtn.disabled = false;
-                    saveBtn.disabled = true;
-                    extractedText.textContent = '';
-                    status.textContent = 'Image loaded. Click "Process Image" to analyze.';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                status.textContent = 'Please select an image file (JPEG, PNG, etc.)';
-            }
-        }
-
-        function processImage() {
-            if (!originalImage) {
-                status.textContent = 'Please load an image first';
-                return;
-            }
-
-            status.textContent = 'Processing image... (This demo simulates the Python app behavior)';
-            processBtn.disabled = true;
-
-            // Simulate processing delay
-            setTimeout(() => {
-                // Demo OCR results
-                const demoText = "This is a demonstation of the OCR functionality. " +
-                                "The Python version would use Tesseract to extract text " +
-                                "and identify misspelled words like 'demonstation' and " +
-                                "'funtionality' in the image.";
-
-                // Demo misspelled words
-                misspelledWords = ['demonstation', 'funtionality'];
-
-                // Format text with highlighted misspellings
-                let formattedText = demoText;
-                misspelledWords.forEach(word => {
-                    const regex = new RegExp(word, 'gi');
-                    formattedText = formattedText.replace(regex,
-                        `<span class="misspelled">${word}</span>`);
-                });
-
-                extractedText.innerHTML = formattedText;
-                status.textContent = `Processing complete. Found ${misspelledWords.length} misspelled words.`;
-                saveBtn.disabled = false;
-
-                // For demo purposes, we'll just show the original image with a red border
-                imagePreview.style.border = '2px solid red';
-                processedImage = originalImage;
-            }, 2000);
-        }
-
-        function saveResult() {
-            if (!processedImage) {
-                status.textContent = 'No processed result to save';
-                return;
-            }
-
-            // Create a temporary link to download the "processed" image
-            const link = document.createElement('a');
-            link.href = processedImage;
-            link.download = 'processed_' + fileInput.files[0].name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            status.textContent = 'Image saved as ' + link.download;
-        }
-    </script>
+    <footer>
+      &copy; 2025 OCR Spell Check App by Tejas | Built with ❤️ using Python
+    </footer>
+  </div>
 </body>
 </html>
